@@ -1,0 +1,492 @@
+# ============================================================
+# Loon tvOS Stable Config
+# 基于 sooyaaabo LoonLab 配置修改
+# 目标：Apple TV / tvOS 稳定性优先
+# ============================================================
+
+[General]
+
+# ------------------------------------------------------------
+# 网络
+# ------------------------------------------------------------
+
+ip-mode = v4-only
+ipv6-vif = off
+
+interface-mode = auto
+
+# ------------------------------------------------------------
+# DNS
+#
+# tvOS 稳定版暂时不启用 DoH3 / DoQ。
+# 普通 DNS + 一个稳定 DoH 已足够。
+#
+# 如果仍然出现 DNS 问题，可以进一步只保留：
+# dns-server = system,223.5.5.5
+# ------------------------------------------------------------
+
+dns-server = system,223.5.5.5,119.29.29.29
+
+doh-server = https://dns.alidns.com/dns-query
+
+# tvOS 暂时关闭
+# doh3-server = h3://dns.alidns.com/dns-query
+# doq-server = quic://dns.alidns.com:853
+
+# ------------------------------------------------------------
+# Wi-Fi 共享
+# ------------------------------------------------------------
+
+wifi-access-http-port = 6154
+wifi-access-socks5-port = 6153
+
+allow-wifi-access = false
+mitm-on-wifi-access = false
+
+# ------------------------------------------------------------
+# 测速
+# ------------------------------------------------------------
+
+test-timeout = 5
+
+internet-test-url = http://connectivitycheck.platform.hicloud.com/generate_204
+proxy-test-url = http://latency-test.skk.moe/endpoint
+
+# ------------------------------------------------------------
+# DNS / SNI
+# ------------------------------------------------------------
+
+domain-reject-mode = DNS
+dns-reject-mode = LoopbackIP
+
+sni-sniffing = true
+
+# ------------------------------------------------------------
+# UDP
+#
+# tvOS 视频 App 大量使用 UDP / QUIC。
+#
+# 原配置：
+# disable-stun = true
+# udp-fallback-mode = REJECT
+#
+# 排障和稳定优先改为下面这样。
+# ------------------------------------------------------------
+
+disable-stun = false
+
+udp-fallback-mode = DIRECT
+
+# 如果确认所有代理节点 UDP 都没问题，并且你比较在意
+# UDP 绝不能直连，再改回：
+#
+# udp-fallback-mode = REJECT
+
+
+# 切换策略时不主动杀连接
+disconnect-on-policy-change = false
+
+
+# ------------------------------------------------------------
+# Sub-Store Parser
+#
+# 不使用 releases/latest/download，
+# 改用 release 分支，兼容性相对更可控。
+# ------------------------------------------------------------
+
+resource-parser = https://raw.githubusercontent.com/sub-store-org/Sub-Store/release/sub-store-parser.loon.min.js
+
+
+# ------------------------------------------------------------
+# Geo Data
+# ------------------------------------------------------------
+
+geoip-url = https://loon.103516.xyz/GeoData/Country-Masaiki.mmdb
+
+ipasn-url = https://loon.103516.xyz/GeoData/GeoLite2-ASN-P3TERX.mmdb
+
+
+# ------------------------------------------------------------
+# 绕过代理
+# ------------------------------------------------------------
+
+skip-proxy = 192.168.0.0/16,10.0.0.0/8,172.16.0.0/12,localhost,*.local,e.crashlynatics.com
+
+
+# ------------------------------------------------------------
+# 绕过 TUN
+# ------------------------------------------------------------
+
+bypass-tun = 10.0.0.0/8,100.64.0.0/10,127.0.0.0/8,169.254.0.0/16,172.16.0.0/12,192.0.0.0/24,192.0.2.0/24,192.88.99.0/24,192.168.0.0/16,198.51.100.0/24,203.0.113.0/24,224.0.0.0/4,255.255.255.255/32
+
+
+
+# ============================================================
+# Proxy
+# ============================================================
+
+[Proxy]
+
+
+
+# ============================================================
+# Remote Proxy
+#
+# 请把下面三个 URL 换成你自己的订阅。
+#
+# tvOS 修改重点：
+#
+# 1. parser-enabled=true
+# 2. block-quic=false
+# 3. skip-cert-verify=default
+#
+# Apple TV 上 YouTube 等应用大量使用 QUIC，
+# 不建议全局 block-quic=true。
+# ============================================================
+
+[Remote Proxy]
+
+81debcdf49d8ffcc = https://checkhere.top/link/W0mlxwQreBwJKRzg?clash=1,parser-enabled = true,udp=true,block-quic=true,fast-open=default,vmess-aead=true,skip-cert-verify=true,enabled=true,flexible-sni=false
+
+jhq-ace = https://just.adomainforsub.org/sub/a70d6d2ddec4b930,parser-enabled = true,udp=true,block-quic=true,fast-open=default,vmess-aead=true,skip-cert-verify=true,enabled=true,flexible-sni=false
+8debc0269a19f67d = https://192.243.117.28:65535/api/rest?token=c96d5cdb8b069d12f76217a239142b35,udp=true,block-quic=true,fast-open=default,vmess-aead=true,skip-cert-verify=true,enabled=true,flexible-sni=false
+
+
+
+
+# ============================================================
+# Remote Filter
+# ============================================================
+
+[Remote Filter]
+
+
+# 所有正常节点
+Sub-ALL = NameRegex, FilterKey = "^(?=.*(.))(?!.*((?i)群|邀请|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|无法|说明|使用|提示|特别|访问|支持|教程|关注|更新|作者|加入|超时|收藏|福利|好友|失联|总计|重置|重新|设置|(\b(USE|USED|TOTAL|EXPIRE|EMAIL|Panel|Channel|Author|Traffic)(\d+)?\b|(\d{4}-\d{2}-\d{2}|\dG)))).*$"
+
+
+# 香港
+Sub-HK = NameRegex, FilterKey = "^(?=.*((?i)🇭🇰|香港|(\b(HK|HKG|Hong)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|🎮|(\bGAME\b))).*$"
+
+
+# 澳门
+# 删除原配置里的 Oman
+# Oman = 阿曼，不是澳门
+Sub-MO = NameRegex, FilterKey = "^(?=.*((?i)🇲🇴|澳门|(\b(MO|MAC|Macau|Macao)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|🎮|(\bGAME\b))).*$"
+
+
+# 台湾
+Sub-TW = NameRegex, FilterKey = "^(?=.*((?i)🇹🇼|台湾|(\b(TW|TWN|Tai|Taiwan)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|🎮|(\bGAME\b))).*$"
+
+
+# 日本
+Sub-JP = NameRegex, FilterKey = "^(?=.*((?i)🇯🇵|日本|川日|东京|大阪|泉日|埼玉|(\b(JP|JPN|Japan)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|🎮|(\bGAME\b))).*$"
+
+
+# 韩国
+Sub-KR = NameRegex, FilterKey = "^(?=.*((?i)🇰🇷|韩国|韓|首尔|(\b(KR|KOR|Korea)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|🎮|(\bGAME\b))).*$"
+
+
+# 新加坡
+Sub-SG = NameRegex, FilterKey = "^(?=.*((?i)🇸🇬|新加坡|狮|(\b(SG|SGP|Singapore)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|🎮|(\bGAME\b))).*$"
+
+
+# 美国
+Sub-US = NameRegex, FilterKey = "^(?=.*((?i)🇺🇸|美国|波特兰|达拉斯|俄勒冈|凤凰城|费利蒙|硅谷|拉斯维加斯|洛杉矶|圣何塞|圣克拉拉|西雅图|芝加哥|(\b(US|USA|United States)(\d+)?\b)))(?!.*((?i)回国|校园|游戏|🎮|(\bGAME\b))).*$"
+
+
+# 其他地区
+Sub-RA = NameRegex, FilterKey = "^(?=.*(.))(?!.*((?i)🇭🇰|🇲🇴|🇹🇼|🇯🇵|🇰🇷|🇸🇬|🇺🇸|香港|澳门|台湾|日本|川日|东京|大阪|泉日|埼玉|韩国|韓|首尔|新加坡|狮|美国|波特兰|达拉斯|俄勒冈|凤凰城|费利蒙|硅谷|拉斯维加斯|洛杉矶|圣何塞|圣克拉拉|西雅图|芝加哥|群|邀请|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|无法|说明|使用|提示|特别|访问|支持|教程|关注|更新|作者|加入|超时|收藏|福利|好友|失联|总计|重置|重新|设置|回国|校园|游戏|🎮|(\b(HK|HKG|Hong|MO|MAC|Macau|Macao|TW|TWN|Tai|Taiwan|JP|JPN|Japan|KR|KOR|Korea|SG|SGP|Singapore|US|USA|United States|America|USE|USED|TOTAL|EXPIRE|EMAIL|Panel|Channel|Author|Traffic)(\d+)?\b|(\d{4}-\d{2}-\d{2}|\dG)))).*$"
+
+
+
+# ============================================================
+# Proxy Group
+#
+# tvOS 优化：
+#
+# 1. 测速周期 60s → 300s
+# 2. 增加“自动选择”
+# 3. 故障转移直接使用全部正常节点
+# 4. FINAL 不依赖多层策略组
+# ============================================================
+
+[Proxy Group]
+
+
+# ------------------------------------------------------------
+# 主策略
+# ------------------------------------------------------------
+
+手动选择 = select,自动选择,故障转移,Hong Kong,Taiwan,Japan,South Korea,Singapore,United States,Macao,Rare Areas,DIRECT,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/Other/Select.png
+
+
+自动选择 = url-test,Sub-ALL,interval=300,tolerance=100,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/Other/UrlTest.png
+
+
+故障转移 = fallback,Sub-ALL,interval=300,max-timeout=3000,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/Other/Fallback.png
+
+
+负载均衡 = load-balance,Sub-ALL,interval=300,max-timeout=3000,algorithm=pcc,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/Other/LoadBalance.png
+
+
+Global = select,自动选择,故障转移,Hong Kong,Taiwan,Japan,Singapore,United States,Rare Areas,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/Flag/WorldMap.png
+
+
+
+# ------------------------------------------------------------
+# 地区
+# ------------------------------------------------------------
+
+Hong Kong = url-test,Sub-HK,interval=300,tolerance=100,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/Flag/HongKong.png
+
+Macao = url-test,Sub-MO,interval=300,tolerance=100,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/Flag/Macao.png
+
+Taiwan = url-test,Sub-TW,interval=300,tolerance=100,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/Flag/Taiwan.png
+
+Japan = url-test,Sub-JP,interval=300,tolerance=100,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/Flag/Japan.png
+
+South Korea = url-test,Sub-KR,interval=300,tolerance=100,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/Flag/SouthKorea.png
+
+Singapore = url-test,Sub-SG,interval=300,tolerance=100,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/Flag/Singapore.png
+
+United States = url-test,Sub-US,interval=300,tolerance=100,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/Flag/UnitedStates.png
+
+Rare Areas = select,Sub-RA,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/Flag/UnitedNations.png
+
+
+
+# ============================================================
+# 服务策略
+# ============================================================
+
+Apple = select,DIRECT,自动选择,Hong Kong,Taiwan,Japan,Singapore,United States,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/App/Apple-02.png
+
+
+# AI 不建议香港/澳门
+AI = select,Japan,Singapore,United States,自动选择,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/App/Anthropic.png
+
+
+TikTok = select,Taiwan,Japan,South Korea,Singapore,United States,Hong Kong,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/App/TikTok-02.png
+
+
+CryptoCurrency = select,自动选择,Hong Kong,Taiwan,Japan,South Korea,Singapore,United States,Rare Areas,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/App/Bitcoin-02.png
+
+
+Telegram = select,自动选择,Hong Kong,Taiwan,Japan,Singapore,United States,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/App/Telegram-01.png
+
+
+GitHub = select,自动选择,Hong Kong,Taiwan,Japan,Singapore,United States,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/App/GitHub-02.png
+
+
+Google = select,自动选择,Hong Kong,Taiwan,Japan,Singapore,United States,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/App/Google.png
+
+
+Microsoft = select,自动选择,Hong Kong,Taiwan,Japan,Singapore,United States,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/App/Microsoft.png
+
+
+Instagram = select,自动选择,Hong Kong,Taiwan,Japan,South Korea,Singapore,United States,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/App/Instagram-02.png
+
+
+X = select,自动选择,Hong Kong,Taiwan,Japan,Singapore,United States,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/App/Twitter-02.png
+
+
+YouTube = select,自动选择,Hong Kong,Taiwan,Japan,South Korea,Singapore,United States,img-url=https://raw.githubusercontent.com/sooyaaabo/IconLibrary/main/App/YouTube.png
+
+
+
+# ============================================================
+# Proxy Chain
+# ============================================================
+
+[Proxy Chain]
+
+
+
+# ============================================================
+# Local Rule
+# ============================================================
+
+[Rule]
+
+
+# 你的 Emby 自定义分流
+DOMAIN,emby2.69yun69.com,Taiwan
+
+DOMAIN,emby3.69yun69.com,自动选择
+
+DOMAIN,p3mc4.mobaiemby.site,Taiwan
+
+DOMAIN,matrix.313445.xyz,Taiwan
+
+
+# 最终兜底
+#
+# 和原配置相比：
+# FINAL 不再套：
+#
+# 国家 url-test
+#     ↓
+# fallback
+#
+# 而是直接使用全部节点 fallback，
+# tvOS 出错链路更短。
+#
+FINAL,故障转移
+
+
+
+# ============================================================
+# Remote Rule
+# ============================================================
+
+[Remote Rule]
+
+
+https://rule.kelee.one/Loon/WeChat.lsr,policy=DIRECT,tag=WeChat,enabled=true
+
+
+https://loon.103516.xyz/Rule/Apple.lsr,policy=Apple,tag=Apple,enabled=true
+
+
+https://loon.103516.xyz/Rule/AI.lsr,policy=AI,tag=AI,enabled=true
+
+
+https://loon.103516.xyz/Rule/TikTok.lsr,policy=TikTok,tag=TikTok,enabled=true
+
+
+https://loon.103516.xyz/Rule/CryptoCurrency.lsr,policy=CryptoCurrency,tag=CryptoCurrency,enabled=true
+
+
+https://rule.kelee.one/Loon/Telegram.lsr,policy=Telegram,tag=Telegram,enabled=true
+
+
+https://rule.kelee.one/Loon/GitHub.lsr,policy=GitHub,tag=GitHub,enabled=true
+
+
+https://rule.kelee.one/Loon/Google.lsr,policy=Google,tag=Google,enabled=true
+
+
+https://rule.kelee.one/Loon/Microsoft.lsr,policy=Microsoft,tag=Microsoft,enabled=true
+
+
+https://rule.kelee.one/Loon/Instagram.lsr,policy=Instagram,tag=Instagram,enabled=true
+
+
+https://rule.kelee.one/Loon/Twitter.lsr,policy=X,tag=X,enabled=true
+
+
+https://rule.kelee.one/Loon/YouTube.lsr,policy=YouTube,tag=YouTube,enabled=true
+
+
+# 原来这里固定 United States。
+#
+# 改成 Global，避免大量普通国外流量全部强制美国。
+https://rule.kelee.one/Loon/Global.lsr,policy=Global,tag=Global,enabled=true
+
+
+https://rule.kelee.one/Loon/ChinaMax.lsr,policy=DIRECT,tag=ChinaMax,enabled=true
+
+
+https://kelee.one/Tool/Loon/Lsr/LAN_SPLITTER.lsr,policy=DIRECT,tag=LAN,enabled=true
+
+
+# 这一条保持最后，别往前移
+https://kelee.one/Tool/Loon/Lsr/REGION_SPLITTER.lsr,policy=DIRECT,tag=CN REGION,enabled=true
+
+
+
+# ============================================================
+# Host
+#
+# tvOS 不建议使用你原来那组 Apple CDN 强制 Host 映射。
+#
+# 特别是：
+#
+# updates.cdn-apple.com
+#
+# Apple TV 本身就是 Apple 系统设备，
+# 没必要对系统更新 CDN 强制重写。
+# ============================================================
+
+[Host]
+
+
+
+# ============================================================
+# Rewrite
+# ============================================================
+
+[Rewrite]
+
+
+
+# ============================================================
+# Script
+# ============================================================
+
+[Script]
+
+
+
+# ============================================================
+# Remote Script
+# ============================================================
+
+[Remote Script]
+
+
+
+# ============================================================
+# Plugin
+#
+# tvOS 第一阶段全部关闭。
+#
+# 确认代理稳定后可以逐个打开。
+# 推荐恢复顺序：
+#
+# 1 Block_HTTPDNS
+# 2 BlockAdvertisers
+# 3 Remove_ads
+#
+# Sub-Store / Script-Hub / BoxJs
+# Apple TV 一般没有必要常驻。
+# ============================================================
+
+[Plugin]
+
+
+https://kelee.one/Tool/Loon/Lpx/Block_HTTPDNS.lpx,pin=true,enabled=false
+
+
+https://kelee.one/Tool/Loon/Lpx/BlockAdvertisers.lpx,pin=true,enabled=false
+
+
+https://kelee.one/Tool/Loon/Lpx/Remove_ads_by_keli.lpx,pin=true,enabled=false
+
+
+https://loon.103516.xyz/Plugin/Sub-Store.lpx,policy=故障转移,enabled=false
+
+
+https://loon.103516.xyz/Plugin/Script-Hub.lpx,policy=故障转移,enabled=false
+
+
+https://loon.103516.xyz/Plugin/BoxJs.lpx,policy=故障转移,enabled=false
+
+
+
+# ============================================================
+# MITM
+#
+# tvOS 稳定版先彻底不使用 MITM。
+#
+# 不要直接把 iPhone 的 ca-p12 粘贴过来。
+# 如果以后 tvOS 确实需要 HTTPS Rewrite，
+# 在 Apple TV 端单独安装并信任 CA。
+# ============================================================
+
+[MITM]
+
+hostname =
+
+skip-server-cert-verify = false
